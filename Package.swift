@@ -54,6 +54,9 @@ let platformProducts: [Product] =  [
 let package = Package(
     name: "GPUImage",
     products: platformProducts,
+    platforms: [
+        .iOS("7.0") // set minimum iOS you want to support
+    ],
     dependencies: platformDependencies,
     targets: platformTargets,
     swiftLanguageVersions: [.v4]
