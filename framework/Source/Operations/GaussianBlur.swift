@@ -92,29 +92,35 @@ func vertexShaderForStandardGaussianBlurOfRadius(_ radius:UInt, sigma:Double) ->
     return shaderString
 }
 
-func fragmentShaderForStandardGaussianBlurOfRadius(_ radius:UInt, sigma:Double) -> String {
+func fragmentShaderForStandardGaussianBlurOfRadius(_ radius: UInt, sigma: Double) -> String {
     guard (radius > 0) else { return PassthroughFragmentShader }
 
-    let gaussianWeights = standardGaussianWeightsForRadius(radius, sigma:sigma)
-    
+    let gaussianWeights = standardGaussianWeightsForRadius(radius, sigma: sigma)
     let numberOfBlurCoordinates = radius * 2 + 1
-#if GLES
-    var shaderString = "uniform sampler2D inputImageTexture;\n \n varying highp vec2 blurCoordinates[\(numberOfBlurCoordinates)];\n \n void main()\n {\n lowp vec4 sum = vec4(0.0);\n"
-#else
-    var shaderString = "uniform sampler2D inputImageTexture;\n \n varying vec2 blurCoordinates[\(numberOfBlurCoordinates)];\n \n void main()\n {\n vec4 sum = vec4(0.0);\n"
-#endif
+
+    var shaderString = """
+    // Fragment shader for iOS OpenGL ES
+    precision mediump float; // <-- REQUIRED
+    uniform sampler2D inputImageTexture;
+    varying highp vec2 blurCoordinates[\(numberOfBlurCoordinates)];
+
+    void main() {
+        lowp vec4 sum = vec4(0.0);
+    """
 
     for currentBlurCoordinateIndex in 0..<numberOfBlurCoordinates {
         let offsetFromCenter = Int(currentBlurCoordinateIndex) - Int(radius)
-        if (offsetFromCenter < 0) {
+        if offsetFromCenter < 0 {
             shaderString += "sum += texture2D(inputImageTexture, blurCoordinates[\(currentBlurCoordinateIndex)]) * \(gaussianWeights[-offsetFromCenter]);\n"
         } else {
             shaderString += "sum += texture2D(inputImageTexture, blurCoordinates[\(currentBlurCoordinateIndex)]) * \(gaussianWeights[offsetFromCenter]);\n"
         }
     }
-    shaderString += "gl_FragColor = sum;\n }\n"
+
+    shaderString += "gl_FragColor = sum;\n}\n"
     return shaderString
 }
+
 
 // MARK: -
 // MARK: Optimized Gaussian blur shaders
