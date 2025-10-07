@@ -76,7 +76,7 @@ func vertexShaderForStandardGaussianBlurOfRadius(_ radius:UInt, sigma:Double) ->
     guard (radius > 0) else { return OneInputVertexShader }
     
     let numberOfBlurCoordinates = radius * 2 + 1
-    var shaderString = "attribute vec4 position;\n attribute vec4 inputTextureCoordinate;\n \n uniform float texelWidth;\n uniform float texelHeight;\n \n varying vec2 blurCoordinates[\(numberOfBlurCoordinates)];\n \n void main()\n {\n gl_Position = position;\n \n vec2 singleStepOffset = vec2(texelWidth, texelHeight);\n"
+    var shaderString = "#version 310 es \n attribute highp vec4 position;\n attribute highp vec4 inputTextureCoordinate;\n \n uniform  highp float texelWidth;\n uniform highp float texelHeight;\n \n varying highp vec2 blurCoordinates[\(numberOfBlurCoordinates)];\n \n void main()\n {\n gl_Position = position;\n \n highp vec2 singleStepOffset = vec2(texelWidth, texelHeight);\n"
     for currentBlurCoordinateIndex in 0..<numberOfBlurCoordinates {
         let offsetFromCenter = Int(currentBlurCoordinateIndex) - Int(radius)
         if (offsetFromCenter < 0) {
